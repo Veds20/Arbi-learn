@@ -27,6 +27,11 @@
 | **Live Prices** | **Block Simulator** |
 | ![Prices](screenshots/screenshot-prices.png) | ![Simulator](screenshots/screenshot-simulator.png) |
 
+> [!TIP]
+> **Block Simulator Detail**: Below is the "Mining Log" and insight section of the simulator, showing the proof-of-work history and immutability logic in action.
+>
+> ![Mining Log](screenshots/screenshot-simulator-log.png)
+
 ---
 
 
