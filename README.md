@@ -19,6 +19,17 @@
 
 ---
 
+## 📸 Screenshots
+
+| Home Page | Concepts Page |
+| :---: | :---: |
+| ![Home](screenshots/screenshot-home.png) | ![Concepts](screenshots/screenshot-concepts.png) |
+| **Live Prices** | **Block Simulator** |
+| ![Prices](screenshots/screenshot-prices.png) | ![Simulator](screenshots/screenshot-simulator.png) |
+
+---
+
+
 ## 🚀 How to Run Locally
 
 ### Option 1 — Just open the files (simplest)
