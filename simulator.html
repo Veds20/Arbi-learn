@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Block Simulator — ArbiLearn</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .page-hero {
+      position: relative;
+      z-index: 1;
+      padding: 4rem 2rem 2rem;
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* ── EXPLAINER STRIP ── */
+    .explainer {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 3rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .exp-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .exp-icon { font-size: 1.25rem; flex-shrink: 0; }
+    .exp-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .exp-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5; }
+
+    /* ── CHAIN ── */
+    .chain-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 2rem;
+    }
+
+    .chain-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chain-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .blocks-row {
+      display: flex;
+      gap: 0;
+      align-items: flex-start;
+      overflow-x: auto;
+      padding-bottom: 1rem;
+    }
+
+    /* ── BLOCK CARD ── */
+    .block-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      min-width: 340px;
+      max-width: 380px;
+      flex-shrink: 0;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      position: relative;
+    }
+
+    .block-card.valid {
+      border-color: rgba(0,230,118,0.35);
+      box-shadow: 0 0 24px rgba(0,230,118,0.08);
+    }
+
+    .block-card.invalid {
+      border-color: rgba(255,23,68,0.4);
+      box-shadow: 0 0 24px rgba(255,23,68,0.1);
+      animation: shake 0.4s ease;
+    }
+
+    .block-card.mining {
+      border-color: rgba(255,145,0,0.4);
+      box-shadow: 0 0 24px rgba(255,145,0,0.1);
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-4px); }
+      40% { transform: translateX(4px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(3px); }
+    }
+
+    .block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .block-title {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+    }
+
+    .block-status {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 100px;
+    }
+
+    .block-status.valid {
+      background: rgba(0,230,118,0.12);
+      color: var(--arb-green);
+      border: 1px solid rgba(0,230,118,0.25);
+    }
+
+    .block-status.invalid {
+      background: rgba(255,23,68,0.12);
+      color: var(--arb-red);
+      border: 1px solid rgba(255,23,68,0.25);
+    }
+
+    .block-status.mining {
+      background: rgba(255,145,0,0.12);
+      color: var(--arb-orange);
+      border: 1px solid rgba(255,145,0,0.25);
+    }
+
+    .block-status.pending {
+      background: rgba(122,156,192,0.1);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    /* ── FIELDS ── */
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    .field-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .field-label span {
+      color: var(--arb-blue);
+      font-size: 0.6rem;
+      background: rgba(18,170,255,0.08);
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: none;
+    }
+
+    .field-input:focus { border-color: var(--arb-blue); }
+
+    .field-readonly {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      word-break: break-all;
+      line-height: 1.5;
+      min-height: 40px;
+    }
+
+    .hash-display {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.6rem 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      word-break: break-all;
+      line-height: 1.6;
+      color: var(--text-muted);
+      min-height: 50px;
+      transition: color 0.3s, border-color 0.3s;
+      position: relative;
+    }
+
+    .hash-display.valid-hash {
+      color: var(--arb-green);
+      border-color: rgba(0,230,118,0.3);
+    }
+
+    .hash-display.invalid-hash {
+      color: var(--arb-red);
+      border-color: rgba(255,23,68,0.3);
+    }
+
+    .hash-prefix {
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    /* ── NONCE DISPLAY ── */
+    .nonce-counter {
+      font-family: var(--font-mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--arb-orange);
+      margin-bottom: 0.25rem;
+    }
+
+    /* ── MINE BUTTON ── */
+    .mine-btn {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      background: linear-gradient(135deg, var(--arb-blue), var(--arb-cyan));
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.05em;
+    }
+
+    .mine-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow-strong);
+    }
+
+    .mine-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .mine-btn.mining-anim {
+      background: linear-gradient(135deg, var(--arb-orange), #ff6f00);
+      animation: glow-pulse 0.8s ease-in-out infinite;
+    }
+
+    /* ── CHAIN LINK ── */
+    .chain-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 1rem;
+      padding-top: 80px;
+      flex-shrink: 0;
+    }
+
+    .chain-link-line {
+      width: 40px;
+      height: 3px;
+      background: var(--border-bright);
+      border-radius: 2px;
+      transition: background 0.3s;
+      position: relative;
+    }
+
+    .chain-link-line::before,
+    .chain-link-line::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 8px; height: 8px;
+      background: var(--border-bright);
+      border-radius: 50%;
+      transform: translateY(-50%);
+    }
+
+    .chain-link-line::before { left: -4px; }
+    .chain-link-line::after { right: -4px; }
+
+    .chain-link-line.valid-link { background: var(--arb-green); }
+    .chain-link-line.valid-link::before,
+    .chain-link-line.valid-link::after { background: var(--arb-green); }
+
+    .chain-link-line.broken-link { background: var(--arb-red); }
+    .chain-link-line.broken-link::before,
+    .chain-link-line.broken-link::after { background: var(--arb-red); }
+
+    /* ── MINING LOG ── */
+    .mining-log {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 2rem;
+    }
+
+    .log-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+      height: 140px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.6;
+    }
+
+    .log-entry { padding: 0.1rem 0; }
+    .log-entry.success { color: var(--arb-green); }
+    .log-entry.error { color: var(--arb-red); }
+    .log-entry.info { color: var(--arb-blue); }
+    .log-entry.warn { color: var(--arb-orange); }
+    .log-entry.muted { color: var(--text-muted); }
+
+    /* ── INSIGHT ── */
+    .insight-box {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+    }
+
+    .insight-inner {
+      background: linear-gradient(135deg, rgba(18,170,255,0.06), rgba(0,229,255,0.03));
+      border: 1px solid rgba(18,170,255,0.2);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 2rem;
+    }
+
+    .insight-inner h3 { font-size: 1rem; margin-bottom: 0.5rem; color: var(--arb-blue); }
+    .insight-inner p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+
+    @media (max-width: 768px) {
+      .block-card { min-width: 300px; }
+      .blocks-row { flex-direction: column; }
+      .chain-link { flex-direction: row; padding: 1rem 0; padding-left: 1.5rem; }
+      .chain-link-line { width: 40px; height: 3px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="index.html">⬡ Arbi<span>Learn</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="concepts.html">Concepts</a></li>
+      <li><a href="prices.html">Live Prices</a></li>
+      <li><a href="simulator.html" class="active">Block Sim</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero animate-fade-up">
+    <div class="section-label">Interactive Demo</div>
+    <h1 class="section-title">Block Mining Simulator</h1>
+    <p class="section-subtitle">Mine real SHA-256 hashes. Break the chain. Feel immutability firsthand.</p>
+  </div>
+
+  <!-- EXPLAINER -->
+  <div class="explainer">
+    <div class="exp-card">
+      <div class="exp-icon">🔢</div>
+      <div>
+        <div class="exp-title">Nonce</div>
+        <div class="exp-desc">A number miners increment trying to find a hash matching the target difficulty.</div>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-icon">#️⃣</div>
+      <div>
+        <div class="exp-title">SHA-256 Hash</div>
+        <div class="exp-desc">A deterministic function — same input always gives same 64-char hex output.</div>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-icon">⛏️</div>
+      <div>
+        <div class="exp-title">Proof of Work</div>
+        <div class="exp-desc">Find a nonce so the hash starts with "00" — requires computational effort.</div>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-icon">⛓️</div>
+      <div>
+        <div class="exp-title">Immutability</div>
+        <div class="exp-desc">Change Block 1 data → Block 2's previous hash breaks → chain invalidates.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAIN -->
+  <div class="chain-container">
+    <div class="chain-label">Blockchain — 2 Blocks</div>
+    <div class="blocks-row">
+
+      <!-- GENESIS BLOCK -->
+      <div class="block-card" id="block1" data-block="1">
+        <div class="block-header">
+          <div class="block-title">BLOCK #1 — Genesis</div>
+          <div class="block-status pending" id="status1">⬜ Pending</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Previous Hash <span>hardcoded</span></div>
+          <div class="field-readonly">0000000000000000000000000000000000000000000000000000000000000000</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Block Data <span>editable</span></div>
+          <textarea
+            class="field-input"
+            id="data1"
+            rows="2"
+            placeholder="Enter transaction data, e.g. Alice → Bob: 1 ETH"
+            oninput="onDataChange(1)"
+          >Alice → Bob: 1 ETH</textarea>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Nonce</div>
+          <div class="nonce-counter" id="nonce1">0</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">SHA-256 Hash</div>
+          <div class="hash-display" id="hash1">Click "Mine Block" to compute hash...</div>
+        </div>
+
+        <button class="mine-btn" id="mineBtn1" onclick="mineBlock(1)">⛏️ Mine Block #1</button>
+      </div>
+
+      <!-- CHAIN LINK -->
+      <div class="chain-link">
+        <div class="chain-link-line" id="chainLink12"></div>
+      </div>
+
+      <!-- BLOCK 2 -->
+      <div class="block-card" id="block2" data-block="2">
+        <div class="block-header">
+          <div class="block-title">BLOCK #2</div>
+          <div class="block-status pending" id="status2">⬜ Waiting for Block 1</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Previous Hash <span>from Block 1</span></div>
+          <div class="field-readonly" id="prevHash2" style="color: var(--text-muted);">Mine Block #1 first...</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Block Data <span>editable</span></div>
+          <textarea
+            class="field-input"
+            id="data2"
+            rows="2"
+            placeholder="Enter transaction data, e.g. Bob → Carol: 0.5 ETH"
+            oninput="onDataChange(2)"
+          >Bob → Carol: 0.5 ETH</textarea>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Nonce</div>
+          <div class="nonce-counter" id="nonce2">0</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">SHA-256 Hash</div>
+          <div class="hash-display" id="hash2">Mine Block #1 first...</div>
+        </div>
+
+        <button class="mine-btn" id="mineBtn2" onclick="mineBlock(2)" disabled>⛏️ Mine Block #2</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MINING LOG -->
+  <div class="mining-log">
+    <div class="chain-label">Mining Log</div>
+    <div class="log-box" id="logBox">
+      <div class="log-entry info">[ArbiLearn] Block Simulator ready. Edit block data and click Mine.</div>
+      <div class="log-entry muted">[ArbiLearn] Using Web Crypto API — real SHA-256 hashing in your browser.</div>
+      <div class="log-entry muted">[ArbiLearn] Target: hash must start with "00" (simulated proof-of-work).</div>
+    </div>
+  </div>
+
+  <!-- INSIGHT -->
+  <div class="insight-box">
+    <div class="insight-inner">
+      <h3>⚡ The Core Insight: Immutability in Action</h3>
+      <p>
+        Once Block 1 is mined, its hash is locked in. Block 2 stores that hash as "Previous Hash."
+        Now try editing Block 1's data — Block 2 immediately turns <span style="color:var(--arb-red)">invalid</span> 
+        because its stored previous hash no longer matches Block 1's new hash. 
+        This cascading invalidation is exactly why tampering with a blockchain requires re-mining every subsequent block — 
+        an computationally infeasible task on a real network with thousands of nodes.
+      </p>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-left">
+      Made by <strong>Vedant Raval</strong> &nbsp;·&nbsp; Arbitrum Builder Pods &nbsp;·&nbsp; PDEU Batch 2023
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/Veds20" target="_blank">GitHub ↗</a>
+      <a href="index.html">Home</a>
+      <a href="concepts.html">Concepts</a>
+      <a href="prices.html">Prices</a>
+    </div>
+  </footer>
+
+  <script>
+    // ── STATE ──
+    const blockState = {
+      1: { nonce: 0, hash: '', mined: false, data: 'Alice → Bob: 1 ETH', prevHash: '0000000000000000000000000000000000000000000000000000000000000000' },
+      2: { nonce: 0, hash: '', mined: false, data: 'Bob → Carol: 0.5 ETH', prevHash: '' },
+    };
+
+    let miningActive = false;
+
+    // ── SHA-256 via Web Crypto API ──
+    async function sha256(message) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // ── LOG ──
+    function log(msg, type = 'muted') {
+      const box = document.getElementById('logBox');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      box.appendChild(entry);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    // ── SET BLOCK UI ──
+    function setBlockUI(blockNum, state) {
+      // 'valid' | 'invalid' | 'mining' | 'pending'
+      const card = document.getElementById(`block${blockNum}`);
+      const status = document.getElementById(`status${blockNum}`);
+
+      card.className = 'block-card ' + state;
+      status.className = 'block-status ' + state;
+
+      const labels = {
+        valid: '✅ Valid',
+        invalid: '❌ Invalid',
+        mining: '⛏️ Mining...',
+        pending: '⬜ Pending',
+      };
+      status.textContent = labels[state] || state;
+    }
+
+    function setHashUI(blockNum, hash, isValid) {
+      const el = document.getElementById(`hash${blockNum}`);
+      const nonceEl = document.getElementById(`nonce${blockNum}`);
+
+      if (hash) {
+        const prefix = hash.substring(0, 2);
+        const rest = hash.substring(2);
+        el.innerHTML = `<span class="hash-prefix" style="color:${isValid ? 'var(--arb-green)' : 'var(--arb-red)'}">${prefix}</span>${rest}`;
+        el.className = 'hash-display ' + (isValid ? 'valid-hash' : 'invalid-hash');
+      } else {
+        el.textContent = 'Waiting...';
+        el.className = 'hash-display';
+      }
+
+      nonceEl.textContent = blockState[blockNum].nonce.toLocaleString();
+    }
+
+    // ── ON DATA CHANGE ──
+    function onDataChange(blockNum) {
+      const data = document.getElementById(`data${blockNum}`).value;
+      blockState[blockNum].data = data;
+      blockState[blockNum].mined = false;
+      blockState[blockNum].nonce = 0;
+
+      if (blockNum === 1) {
+        // Invalidate block 2 if it was mined
+        setBlockUI(1, 'pending');
+        document.getElementById('hash1').textContent = 'Data changed — re-mine Block #1';
+        document.getElementById('hash1').className = 'hash-display';
+
+        if (blockState[2].mined) {
+          // Block 2 now broken because prev hash reference is gone
+          checkBlock2Validity();
+        }
+      } else {
+        setBlockUI(2, 'pending');
+        document.getElementById('hash2').textContent = 'Data changed — re-mine Block #2';
+        document.getElementById('hash2').className = 'hash-display';
+      }
+    }
+
+    // ── CHECK BLOCK 2 VALIDITY ──
+    async function checkBlock2Validity() {
+      if (!blockState[2].mined) return;
+
+      const currentPrevHash = blockState[1].hash;
+      const storedPrevHash = blockState[2].prevHash;
+
+      const prevHashEl = document.getElementById('prevHash2');
+      const link = document.getElementById('chainLink12');
+
+      if (currentPrevHash !== storedPrevHash) {
+        // Chain broken!
+        setBlockUI(2, 'invalid');
+        prevHashEl.style.color = 'var(--arb-red)';
+        link.className = 'chain-link-line broken-link';
+        log('⚠️ CHAIN BROKEN! Block 1 changed — Block 2 is now invalid.', 'error');
+        log('Block 2 previous hash no longer matches Block 1 output hash.', 'warn');
+      } else {
+        setBlockUI(2, 'valid');
+        prevHashEl.style.color = 'var(--arb-green)';
+        link.className = 'chain-link-line valid-link';
+      }
+    }
+
+    // ── MINE BLOCK ──
+    async function mineBlock(blockNum) {
+      if (miningActive) return;
+
+      // Block 2 needs Block 1 mined first
+      if (blockNum === 2 && !blockState[1].mined) {
+        log('⚠️ Mine Block #1 first!', 'warn');
+        return;
+      }
+
+      miningActive = true;
+      const btn = document.getElementById(`mineBtn${blockNum}`);
+      btn.disabled = true;
+      btn.textContent = '⛏️ Mining...';
+      btn.classList.add('mining-anim');
+
+      setBlockUI(blockNum, 'mining');
+
+      const data = document.getElementById(`data${blockNum}`).value;
+      blockState[blockNum].data = data;
+
+      const prevHash = blockNum === 1
+        ? blockState[1].prevHash
+        : blockState[1].hash;
+
+      blockState[blockNum].prevHash = prevHash;
+
+      let nonce = 0;
+      let hash = '';
+      const TARGET = '00';
+
+      log(`Starting proof-of-work for Block #${blockNum}...`, 'info');
+      log(`Data: "${data}"`, 'muted');
+      log(`Previous Hash: ${prevHash.substring(0, 16)}...`, 'muted');
+
+      // Mine asynchronously in chunks so UI stays responsive
+      const CHUNK = 100;
+      const start = performance.now();
+
+      async function mineChunk() {
+        for (let i = 0; i < CHUNK; i++) {
+          const input = `${blockNum}${prevHash}${data}${nonce}`;
+          hash = await sha256(input);
+
+          if (hash.startsWith(TARGET)) {
+            // Found!
+            const elapsed = ((performance.now() - start) / 1000).toFixed(2);
+            blockState[blockNum].nonce = nonce;
+            blockState[blockNum].hash = hash;
+            blockState[blockNum].mined = true;
+
+            setHashUI(blockNum, hash, true);
+            setBlockUI(blockNum, 'valid');
+
+            if (blockNum === 2) {
+              document.getElementById('chainLink12').className = 'chain-link-line valid-link';
+            }
+
+            // Update Block 2 prevHash display
+            if (blockNum === 1) {
+              const prevHashEl = document.getElementById('prevHash2');
+              prevHashEl.textContent = hash;
+              prevHashEl.style.color = 'var(--arb-green)';
+              blockState[2].mined = false; // reset block 2 state
+              document.getElementById('mineBtn2').disabled = false;
+              log(`Block #2 previous hash auto-updated.`, 'info');
+            }
+
+            log(`✅ MINED Block #${blockNum} in ${elapsed}s after ${nonce.toLocaleString()} attempts!`, 'success');
+            log(`Hash: ${hash}`, 'success');
+
+            miningActive = false;
+            btn.disabled = false;
+            btn.textContent = `⛏️ Re-Mine Block #${blockNum}`;
+            btn.classList.remove('mining-anim');
+            return;
+          }
+
+          nonce++;
+        }
+
+        // Update UI every chunk
+        document.getElementById(`nonce${blockNum}`).textContent = nonce.toLocaleString();
+        setHashUI(blockNum, hash, false);
+
+        if (nonce % 1000 === 0) {
+          log(`Trying nonce ${nonce.toLocaleString()}... current hash: ${hash.substring(0,12)}...`, 'muted');
+        }
+
+        // Continue
+        setTimeout(mineChunk, 0);
+      }
+
+      mineChunk();
+    }
+
+    // ── WATCH BLOCK 1 CHANGES TO INVALIDATE BLOCK 2 ──
+    const data1El = document.getElementById('data1');
+    data1El.addEventListener('input', async () => {
+      // If block 1 was mined, recompute its hash on the fly to show breakage
+      if (blockState[1].mined || blockState[2].mined) {
+        const newData = data1El.value;
+        const input = `1${blockState[1].prevHash}${newData}${blockState[1].nonce}`;
+        const newHash = await sha256(input);
+        blockState[1].hash = newHash;
+        blockState[1].data = newData;
+        // Update block2 preview
+        document.getElementById('prevHash2').textContent = newHash;
+
+        const isValid = newHash.startsWith('00');
+        setHashUI(1, newHash, isValid);
+        setBlockUI(1, isValid ? 'valid' : 'invalid');
+
+        await checkBlock2Validity();
+      }
+    });
+
+    log('Ready. Type data and click Mine to begin.', 'info');
+  </script>
+
+</body>
+</html>

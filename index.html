@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArbiLearn — Web3 Explorer</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: calc(100vh - 64px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 1.5rem;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(18, 170, 255, 0.08) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      max-width: 820px;
+      position: relative;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--arb-blue);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      padding: 0.4rem 1rem;
+      border: 1px solid rgba(18, 170, 255, 0.25);
+      border-radius: 100px;
+      background: rgba(18, 170, 255, 0.05);
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--arb-blue);
+      animation: glow-pulse 2s ease-in-out infinite;
+    }
+
+    .hero-title {
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.0;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title .line2 {
+      color: var(--arb-blue);
+      display: block;
+    }
+
+    .hero-desc {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 4rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--arb-blue);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── FEATURES ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--arb-blue), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-4px);
+      box-shadow: var(--glow);
+    }
+
+    .feature-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius);
+      background: rgba(18, 170, 255, 0.1);
+      border: 1px solid rgba(18, 170, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .feature-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ── ARBITRUM SECTION ── */
+    .arb-section {
+      position: relative;
+      z-index: 1;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 5rem 2rem;
+    }
+
+    .arb-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .arb-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .arb-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      position: relative;
+    }
+
+    .arb-card-num {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--arb-blue);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .arb-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+
+    .arb-card-desc {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .chain-viz {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      overflow-x: auto;
+      padding: 2rem 0;
+      margin-top: 2rem;
+    }
+
+    .chain-block {
+      background: var(--surface2);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      min-width: 160px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+
+    .chain-block-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+    }
+
+    .chain-block-hash {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--arb-blue);
+      word-break: break-all;
+    }
+
+    .chain-arrow {
+      flex-shrink: 0;
+      padding: 0 0.75rem;
+      color: var(--arb-blue);
+      font-size: 1.25rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="index.html">⬡ Arbi<span>Learn</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="concepts.html">Concepts</a></li>
+      <li><a href="prices.html">Live Prices</a></li>
+      <li><a href="simulator.html">Block Sim</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-eyebrow animate-fade-up">Layer 2 &amp; Beyond</div>
+      <h1 class="hero-title animate-fade-up delay-1">
+        The Future Runs
+        <span class="line2">on Arbitrum</span>
+      </h1>
+      <p class="hero-desc animate-fade-up delay-2">
+        Ethereum is powerful — but slow and expensive. Arbitrum supercharges it with Layer 2 rollup technology,
+        delivering sub-second transactions and near-zero fees without sacrificing security.
+      </p>
+      <div class="hero-actions animate-fade-up delay-3">
+        <a href="concepts.html" class="btn btn-primary">Explore Concepts →</a>
+        <a href="simulator.html" class="btn btn-outline">Try Block Simulator</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat-item animate-fade-up">
+      <div class="stat-value">&lt; $0.01</div>
+      <div class="stat-label">Avg. Tx Fee on Arbitrum</div>
+    </div>
+    <div class="stat-item animate-fade-up delay-1">
+      <div class="stat-value">40,000+</div>
+      <div class="stat-label">TPS Capacity</div>
+    </div>
+    <div class="stat-item animate-fade-up delay-2">
+      <div class="stat-value">100%</div>
+      <div class="stat-label">EVM Compatible</div>
+    </div>
+    <div class="stat-item animate-fade-up delay-3">
+      <div class="stat-value">$15B+</div>
+      <div class="stat-label">Total Value Locked</div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="section">
+    <div class="section-label">Why ArbiLearn</div>
+    <h2 class="section-title">Learn Web3 by building it</h2>
+    <p class="section-subtitle">
+      Four interactive modules. Real blockchain concepts. Live data. Everything you need to go from curious to capable.
+    </p>
+
+    <div class="features-grid">
+      <div class="feature-card animate-fade-up">
+        <div class="feature-icon">🧠</div>
+        <div class="feature-title">Visual Concepts</div>
+        <p class="feature-desc">Web2 vs Web3, Bitcoin vs Ethereum, public vs private keys — explained through
+          side-by-side comparison cards, not textbook walls.</p>
+      </div>
+      <div class="feature-card animate-fade-up delay-1">
+        <div class="feature-icon">📈</div>
+        <div class="feature-title">Live Price Feed</div>
+        <p class="feature-desc">Real-time BTC, ETH, SOL and more from CoinGecko. Watch prices move, see 24h trends, and
+          feel the market breathe.</p>
+      </div>
+      <div class="feature-card animate-fade-up delay-2">
+        <div class="feature-icon">⛏️</div>
+        <div class="feature-title">Block Simulator</div>
+        <p class="feature-desc">Mine blocks, break chains, watch immutability happen in your browser. The best
+          explanation is one you build yourself.</p>
+      </div>
+      <div class="feature-card animate-fade-up delay-3">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">Arbitrum Focus</div>
+        <p class="feature-desc">Understand why Layer 2 exists, how Optimistic Rollups work, and why Arbitrum is the
+          leading Ethereum scaler.</p>
+      </div>
+      <div class="feature-card animate-fade-up delay-4">
+        <div class="feature-icon">🔐</div>
+        <div class="feature-title">Cryptography Basics</div>
+        <p class="feature-desc">SHA-256 hashing, public/private key pairs, and digital signatures — the math that makes
+          blockchain trustless.</p>
+      </div>
+      <div class="feature-card animate-fade-up delay-5">
+        <div class="feature-icon">🌐</div>
+        <div class="feature-title">Decentralization</div>
+        <p class="feature-desc">No servers, no middlemen, no single point of failure. Understand why decentralization is
+          the paradigm shift of our era.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARBITRUM DEEP DIVE -->
+  <section class="arb-section">
+    <div class="arb-inner">
+      <div class="section-label">The Arbitrum Story</div>
+      <h2 class="section-title">Why Ethereum needed Layer 2</h2>
+      <p class="section-subtitle">
+        Ethereum is the world's programmable blockchain — but popularity came at a cost.
+      </p>
+
+      <div class="arb-cards">
+        <div class="arb-card animate-fade-up">
+          <div class="arb-card-num">01 / THE PROBLEM</div>
+          <div class="arb-card-title">Ethereum's Scalability Trilemma</div>
+          <p class="arb-card-desc">
+            Ethereum prioritizes security and decentralization — but that means sacrificing speed.
+            At peak usage, a single swap could cost $50–$200 in gas fees and take minutes to confirm.
+            This made DeFi, NFTs, and gaming practically unusable for everyday people.
+          </p>
+        </div>
+        <div class="arb-card animate-fade-up delay-1">
+          <div class="arb-card-num">02 / THE SOLUTION</div>
+          <div class="arb-card-title">What Arbitrum Does</div>
+          <p class="arb-card-desc">
+            Arbitrum is an Optimistic Rollup — it batches thousands of transactions off-chain,
+            compresses them, and posts a single proof to Ethereum mainnet. You get Ethereum's
+            security guarantees at a fraction of the cost. Transactions settle in under a second,
+            fees drop to cents, and existing Ethereum smart contracts deploy with zero changes.
+          </p>
+        </div>
+        <div class="arb-card animate-fade-up delay-2">
+          <div class="arb-card-num">03 / REAL BENEFIT</div>
+          <div class="arb-card-title">Arbitrum vs Mainnet in Practice</div>
+          <p class="arb-card-desc">
+            Swapping $100 of ETH on mainnet: ~$15 fee, ~30 second wait. Same swap on Arbitrum One:
+            ~$0.04 fee, ~0.3 second confirmation. The same dApps, same wallet, same security —
+            just 400x cheaper and 100x faster. That's why Arbitrum hosts billions in DeFi TVL.
+          </p>
+        </div>
+      </div>
+
+      <!-- Chain Visualization -->
+      <div style="margin-top: 3rem;">
+        <div class="section-label">How Rollups Work</div>
+        <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem;">Transactions batch → compress → settle
+          on L1</h3>
+        <div class="chain-viz">
+          <div class="chain-block">
+            <div class="chain-block-label">L2 Tx #1</div>
+            <div class="chain-block-hash">swap 0.1 ETH</div>
+          </div>
+          <div class="chain-arrow">+</div>
+          <div class="chain-block">
+            <div class="chain-block-label">L2 Tx #2</div>
+            <div class="chain-block-hash">mint NFT #42</div>
+          </div>
+          <div class="chain-arrow">+</div>
+          <div class="chain-block">
+            <div class="chain-block-label">L2 Tx #3</div>
+            <div class="chain-block-hash">send 50 USDC</div>
+          </div>
+          <div class="chain-arrow">→</div>
+          <div class="chain-block" style="border-color: var(--arb-blue); background: rgba(18,170,255,0.07);">
+            <div class="chain-block-label">Batch Proof</div>
+            <div class="chain-block-hash" style="color: var(--arb-cyan);">3 txs compressed</div>
+          </div>
+          <div class="chain-arrow">→</div>
+          <div class="chain-block" style="border-color: var(--arb-green); background: rgba(0,230,118,0.07);">
+            <div class="chain-block-label">Ethereum L1</div>
+            <div class="chain-block-hash" style="color: var(--arb-green);">✓ Settled</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-left">
+      Made by <strong>Vedant Raval</strong> &nbsp;·&nbsp; Arbitrum Builder Pods &nbsp;·&nbsp; PDEU Batch 2023
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/Veds20" target="_blank">GitHub ↗</a>
+      <a href="concepts.html">Concepts</a>
+      <a href="prices.html">Prices</a>
+      <a href="simulator.html">Simulator</a>
+    </div>
+  </footer>
+
+</body>
+
+</html>

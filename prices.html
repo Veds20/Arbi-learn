@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Prices — ArbiLearn</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .page-hero {
+      position: relative;
+      z-index: 1;
+      padding: 4rem 2rem 2rem;
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* ── CONTROLS ── */
+    .controls {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      max-width: 360px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.6rem 1rem 0.6rem 2.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--arb-blue);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .last-updated {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .live-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--arb-green);
+      animation: glow-pulse 1.5s ease-in-out infinite;
+      margin-right: 0.4rem;
+    }
+
+    /* ── PRICE GRID ── */
+    .price-grid {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .price-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .price-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--card-accent, var(--arb-blue)), transparent);
+    }
+
+    .price-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-bright);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .price-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .coin-identity {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .coin-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+    }
+
+    .coin-logo-placeholder {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .coin-name {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .coin-symbol {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .coin-rank {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.15rem 0.4rem;
+    }
+
+    .price-main {
+      margin-bottom: 1rem;
+    }
+
+    .price-usd {
+      font-family: var(--font-mono);
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .price-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      margin-top: 0.3rem;
+    }
+
+    .price-change.up {
+      background: rgba(0, 230, 118, 0.12);
+      color: var(--arb-green);
+    }
+
+    .price-change.down {
+      background: rgba(255, 23, 68, 0.12);
+      color: var(--arb-red);
+    }
+
+    .price-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .meta-item {}
+
+    .meta-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-family: var(--font-mono);
+    }
+
+    .meta-value {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.1rem;
+      font-family: var(--font-mono);
+    }
+
+    /* ── SPARKLINE ── */
+    .sparkline-wrap {
+      height: 48px;
+      margin-bottom: 1rem;
+    }
+
+    .sparkline-wrap canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ── SKELETON ── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 6px;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    .skeleton-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+    }
+
+    .sk-line {
+      height: 14px;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── ERROR / EMPTY ── */
+    .state-message {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-secondary);
+    }
+
+    .state-message .icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .state-message h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── MARKET OVERVIEW ── */
+    .market-ticker {
+      position: relative;
+      z-index: 1;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 2rem;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .ticker-inner {
+      display: flex;
+      gap: 3rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+
+    .ticker-item {
+      color: var(--text-secondary);
+    }
+
+    .ticker-item strong {
+      color: var(--text-primary);
+    }
+
+    /* padding bottom for footer */
+    .price-grid-wrap {
+      padding-bottom: 4rem;
+    }
+
+    @media (max-width: 600px) {
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-wrap {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <a class="nav-logo" href="index.html">⬡ Arbi<span>Learn</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="concepts.html">Concepts</a></li>
+      <li><a href="prices.html" class="active">Live Prices</a></li>
+      <li><a href="simulator.html">Block Sim</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero animate-fade-up">
+    <div class="section-label">Real-Time Market Data</div>
+    <h1 class="section-title">Crypto Live Prices</h1>
+    <p class="section-subtitle">Live data from CoinGecko — updated on demand. BTC, ETH, and more.</p>
+  </div>
+
+  <!-- TICKER -->
+  <div class="market-ticker" id="ticker">
+    <div class="ticker-inner" id="tickerInner">
+      <span class="ticker-item">Loading market data...</span>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Filter coins..." oninput="filterCoins()" />
+    </div>
+    <div class="controls-right">
+      <span class="last-updated" id="lastUpdated">
+        <span class="live-dot"></span>Fetching data...
+      </span>
+      <button class="btn btn-primary" onclick="fetchPrices()" id="refreshBtn">
+        ↻ Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- PRICE GRID -->
+  <div class="price-grid-wrap">
+    <div class="price-grid" id="priceGrid">
+      <!-- Skeletons -->
+      <div class="skeleton-card">
+        <div class="skeleton sk-line" style="width:60%"></div>
+        <div class="skeleton sk-line" style="width:40%; height: 28px; margin-bottom: 1rem;"></div>
+        <div class="skeleton sk-line" style="width:80%"></div>
+        <div class="skeleton sk-line" style="width:50%"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton sk-line" style="width:60%"></div>
+        <div class="skeleton sk-line" style="width:40%; height: 28px; margin-bottom: 1rem;"></div>
+        <div class="skeleton sk-line" style="width:80%"></div>
+        <div class="skeleton sk-line" style="width:50%"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton sk-line" style="width:60%"></div>
+        <div class="skeleton sk-line" style="width:40%; height: 28px; margin-bottom: 1rem;"></div>
+        <div class="skeleton sk-line" style="width:80%"></div>
+        <div class="skeleton sk-line" style="width:50%"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-left">
+      Made by <strong>Vedant Raval</strong> &nbsp;·&nbsp; Arbitrum Builder Pods &nbsp;·&nbsp; PDEU Batch 2023 
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/Veds20" target="_blank">GitHub ↗</a>
+      <a href="index.html">Home</a>
+      <a href="concepts.html">Concepts</a>
+      <a href="simulator.html">Simulator</a>
+    </div>
+  </footer>
+
+  <script>
+    // ── CONFIG ──
+    const COINS = [
+      { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', icon: '₿', accent: '#f7931a' },
+      { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', icon: '⟠', accent: '#627eea' },
+      { id: 'solana', name: 'Solana', symbol: 'SOL', icon: '◎', accent: '#9945ff' },
+      { id: 'arbitrum', name: 'Arbitrum', symbol: 'ARB', icon: '⬡', accent: '#12aaff' },
+      { id: 'matic-network', name: 'Polygon', symbol: 'POL', icon: '⬟', accent: '#8247e5' },
+      { id: 'chainlink', name: 'Chainlink', symbol: 'LINK', icon: '🔗', accent: '#375bd2' },
+    ];
+
+    const IDS = COINS.map(c => c.id).join(',');
+    const API_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=ethereum,bitcoin&vs_currencies=usd&include_24hr_change=true';
+
+    let allData = {};
+
+    // ── FETCH ──
+    async function fetchPrices() {
+      const btn = document.getElementById('refreshBtn');
+      btn.textContent = '↻ Loading...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error('API error');
+        allData = await res.json();
+        renderCards(allData);
+        renderTicker(allData);
+        const now = new Date().toLocaleTimeString();
+        document.getElementById('lastUpdated').innerHTML =
+          `<span class="live-dot"></span>Updated at ${now}`;
+      } catch (err) {
+        document.getElementById('priceGrid').innerHTML = `
+          <div class="state-message" style="grid-column: 1/-1;">
+            <div class="icon">⚠️</div>
+            <h3>Failed to load prices</h3>
+            <p>CoinGecko API may be rate-limited. Try refreshing in a moment.</p>
+            <br/>
+            <button class="btn btn-outline" onclick="fetchPrices()">Try again</button>
+          </div>
+        `;
+      } finally {
+        btn.textContent = '↻ Refresh';
+        btn.disabled = false;
+      }
+    }
+
+    // ── FORMAT HELPERS ──
+    function fmt(n) {
+      if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
+      if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+      return '$' + n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    }
+
+    function fmtPrice(n) {
+      if (n >= 1000) return '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (n >= 1) return '$' + n.toFixed(4);
+      return '$' + n.toFixed(6);
+    }
+
+    // ── SPARKLINE ──
+    function drawSparkline(canvas, change) {
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width = canvas.offsetWidth || 240;
+      const H = canvas.height = 48;
+      const isUp = change >= 0;
+      const color = isUp ? '#00e676' : '#ff1744';
+
+      // Generate fake trend points seeded by change magnitude
+      const pts = [];
+      let val = 24;
+      for (let i = 0; i < 20; i++) {
+        val += (Math.random() - (isUp ? 0.4 : 0.6)) * 4;
+        val = Math.max(4, Math.min(44, val));
+        pts.push(val);
+      }
+      pts[pts.length - 1] = isUp ? 40 : 8; // end high/low for drama
+
+      const xStep = W / (pts.length - 1);
+
+      // Gradient fill
+      const grad = ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, isUp ? 'rgba(0,230,118,0.25)' : 'rgba(255,23,68,0.25)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+      ctx.beginPath();
+      ctx.moveTo(0, H - pts[0]);
+      pts.forEach((p, i) => {
+        if (i === 0) return;
+        const x = i * xStep;
+        const px = (i - 1) * xStep;
+        const cpx = (px + x) / 2;
+        ctx.bezierCurveTo(cpx, H - pts[i - 1], cpx, H - p, x, H - p);
+      });
+      ctx.lineTo(W, H);
+      ctx.lineTo(0, H);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Line
+      ctx.beginPath();
+      ctx.moveTo(0, H - pts[0]);
+      pts.forEach((p, i) => {
+        if (i === 0) return;
+        const x = i * xStep;
+        const px = (i - 1) * xStep;
+        const cpx = (px + x) / 2;
+        ctx.bezierCurveTo(cpx, H - pts[i - 1], cpx, H - p, x, H - p);
+      });
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // ── RENDER CARDS ──
+    function renderCards(data, query = '') {
+      const grid = document.getElementById('priceGrid');
+      const filtered = COINS.filter(c =>
+        !query ||
+        c.name.toLowerCase().includes(query) ||
+        c.symbol.toLowerCase().includes(query)
+      );
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="state-message" style="grid-column:1/-1;">
+            <div class="icon">🔍</div>
+            <h3>No coins found</h3>
+            <p>Try searching for Bitcoin, ETH, or SOL</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(coin => {
+        const d = data[coin.id];
+        if (!d) return '';
+        const price = d.usd;
+        const change = d.usd_24h_change;
+        const mcap = d.usd_market_cap;
+        const vol = d.usd_24h_vol;
+        const isUp = change >= 0;
+        const changeStr = (isUp ? '▲ +' : '▼ ') + Math.abs(change).toFixed(2) + '%';
+
+        return `
+          <div class="price-card animate-fade-up" style="--card-accent: ${coin.accent};">
+            <div class="price-card-header">
+              <div class="coin-identity">
+                <div class="coin-logo-placeholder">${coin.icon}</div>
+                <div>
+                  <div class="coin-name">${coin.name}</div>
+                  <div class="coin-symbol">${coin.symbol}</div>
+                </div>
+              </div>
+            </div>
+            <div class="sparkline-wrap">
+              <canvas id="spark-${coin.id}"></canvas>
+            </div>
+            <div class="price-main">
+              <div class="price-usd">${fmtPrice(price)}</div>
+              <div class="price-change ${isUp ? 'up' : 'down'}">${changeStr} 24h</div>
+            </div>
+            <div class="price-meta">
+              <div class="meta-item">
+                <div class="meta-label">Market Cap</div>
+                <div class="meta-value">${mcap ? fmt(mcap) : '—'}</div>
+              </div>
+              <div class="meta-item">
+                <div class="meta-label">24h Volume</div>
+                <div class="meta-value">${vol ? fmt(vol) : '—'}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Draw sparklines after DOM update
+      requestAnimationFrame(() => {
+        filtered.forEach(coin => {
+          const d = data[coin.id];
+          if (!d) return;
+          const canvas = document.getElementById(`spark-${coin.id}`);
+          if (canvas) drawSparkline(canvas, d.usd_24h_change);
+        });
+      });
+    }
+
+    // ── TICKER ──
+    function renderTicker(data) {
+      const inner = document.getElementById('tickerInner');
+      inner.innerHTML = COINS.map(coin => {
+        const d = data[coin.id];
+        if (!d) return '';
+        const isUp = d.usd_24h_change >= 0;
+        const color = isUp ? 'var(--arb-green)' : 'var(--arb-red)';
+        const arrow = isUp ? '▲' : '▼';
+        return `
+          <span class="ticker-item">
+            <strong>${coin.symbol}</strong>
+            $${d.usd >= 1 ? d.usd.toLocaleString(undefined, { maximumFractionDigits: 2 }) : d.usd.toFixed(4)}
+            <span style="color:${color}">${arrow} ${Math.abs(d.usd_24h_change).toFixed(2)}%</span>
+          </span>
+        `;
+      }).join('');
+    }
+
+    // ── FILTER ──
+    function filterCoins() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      if (Object.keys(allData).length > 0) {
+        renderCards(allData, query);
+        // Redraw sparklines
+        setTimeout(() => {
+          COINS.filter(c =>
+            !query || c.name.toLowerCase().includes(query) || c.symbol.toLowerCase().includes(query)
+          ).forEach(coin => {
+            const d = allData[coin.id];
+            if (!d) return;
+            const canvas = document.getElementById(`spark-${coin.id}`);
+            if (canvas) drawSparkline(canvas, d.usd_24h_change);
+          });
+        }, 50);
+      }
+    }
+
+    // ── INIT ──
+    fetchPrices();
+
+    // Auto-refresh every 60 seconds
+    setInterval(fetchPrices, 60000);
+  </script>
+
+</body>
+
+</html>

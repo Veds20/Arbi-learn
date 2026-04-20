@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concepts — ArbiLearn</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .page-hero {
+      position: relative;
+      z-index: 1;
+      padding: 4rem 2rem 3rem;
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* ── COMPARISON CARDS ── */
+    .concepts-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 5rem;
+    }
+
+    .concept-block {
+      margin-bottom: 4rem;
+    }
+
+    .concept-heading {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .concept-num {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--arb-blue);
+      background: rgba(18,170,255,0.1);
+      border: 1px solid rgba(18,170,255,0.2);
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .concept-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .vs-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0;
+      align-items: stretch;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .vs-side {
+      padding: 2rem;
+      background: var(--surface);
+    }
+
+    .vs-side.right {
+      background: var(--surface2);
+    }
+
+    .vs-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg2);
+      padding: 0 1.25rem;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+
+    .vs-badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--arb-blue);
+      background: var(--bg);
+      border: 1px solid var(--arb-blue);
+      border-radius: 100px;
+      padding: 0.4rem 0.6rem;
+      writing-mode: vertical-rl;
+      letter-spacing: 0.1em;
+    }
+
+    .vs-entity {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 0.25rem;
+    }
+
+    .vs-tagline {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-bottom: 1.25rem;
+    }
+
+    .vs-traits {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .vs-trait {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .vs-trait-icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      margin-top: 0.1rem;
+    }
+
+    .icon-left { background: rgba(18,170,255,0.15); color: var(--arb-blue); }
+    .icon-right { background: rgba(0,230,118,0.15); color: var(--arb-green); }
+
+    .vs-trait-text strong { color: var(--text-primary); }
+    .vs-trait-text { color: var(--text-secondary); }
+
+    /* Key/Value table style */
+    .concept-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .concept-table th {
+      background: var(--bg2);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .concept-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.5;
+    }
+
+    .concept-table tr:last-child td { border-bottom: none; }
+
+    .concept-table td:first-child {
+      font-weight: 700;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .concept-table .col-a { color: var(--arb-blue); }
+    .concept-table .col-b { color: var(--arb-green); }
+
+    .table-wrapper {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    /* Key pair visual */
+    .key-pair-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .key-card {
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      border: 1px solid var(--border);
+    }
+
+    .key-card.public-key { background: linear-gradient(135deg, rgba(18,170,255,0.08), rgba(18,170,255,0.03)); border-color: rgba(18,170,255,0.3); }
+    .key-card.private-key { background: linear-gradient(135deg, rgba(255,145,0,0.08), rgba(255,145,0,0.03)); border-color: rgba(255,145,0,0.3); }
+
+    .key-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .key-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .key-name { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.75rem; }
+
+    .key-example {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg);
+      border-radius: 6px;
+      word-break: break-all;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .key-points { display: flex; flex-direction: column; gap: 0.5rem; }
+    .key-point { font-size: 0.875rem; color: var(--text-secondary); display: flex; gap: 0.5rem; }
+
+    @media (max-width: 768px) {
+      .vs-grid { grid-template-columns: 1fr; }
+      .vs-divider { writing-mode: horizontal-tb; padding: 0.75rem; border: none; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+      .vs-badge { writing-mode: horizontal-tb; }
+      .key-pair-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="index.html">⬡ Arbi<span>Learn</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="concepts.html" class="active">Concepts</a></li>
+      <li><a href="prices.html">Live Prices</a></li>
+      <li><a href="simulator.html">Block Sim</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero animate-fade-up">
+    <div class="section-label">Web3 Fundamentals</div>
+    <h1 class="section-title">Core Concepts, Decoded</h1>
+    <p class="section-subtitle">Side-by-side comparisons that cut through the jargon. No textbook walls — just clear, visual understanding.</p>
+  </div>
+
+  <div class="concepts-wrapper">
+
+    <!-- 1. Web2 vs Web3 -->
+    <div class="concept-block animate-fade-up">
+      <div class="concept-heading">
+        <span class="concept-num">01</span>
+        <span class="concept-title">Web2 vs Web3</span>
+      </div>
+      <div class="vs-grid">
+        <div class="vs-side">
+          <div class="vs-entity">🌐 Web2</div>
+          <div class="vs-tagline">// The Internet You Know</div>
+          <div class="vs-traits">
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-left">🏢</div>
+              <div class="vs-trait-text"><strong>Centralized control</strong> — Google, Meta, and Amazon own your data, your identity, and your content. They can delete your account, sell your data, or go offline.</div>
+            </div>
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-left">🔑</div>
+              <div class="vs-trait-text"><strong>Username + Password</strong> — Your identity is a database row owned by the platform. Forget your password? Pray to their support team.</div>
+            </div>
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-left">💰</div>
+              <div class="vs-trait-text"><strong>You are the product</strong> — Free apps generate revenue by harvesting and selling behavioral data. Every click is tracked.</div>
+            </div>
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-left">🚫</div>
+              <div class="vs-trait-text"><strong>Permissioned access</strong> — Platforms can ban you, censor content, or restrict API access at will. You have no recourse.</div>
+            </div>
+          </div>
+        </div>
+        <div class="vs-divider">
+          <div class="vs-badge">VS</div>
+        </div>
+        <div class="vs-side right">
+          <div class="vs-entity">⛓️ Web3</div>
+          <div class="vs-tagline">// The Ownership Internet</div>
+          <div class="vs-traits">
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-right">🌍</div>
+              <div class="vs-trait-text"><strong>Decentralized networks</strong> — Thousands of nodes globally hold the data. No single company can shut it down or censor it.</div>
+            </div>
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-right">🔐</div>
+              <div class="vs-trait-text"><strong>Wallet = Identity</strong> — Your cryptographic keypair IS your identity. You own it. No company holds it. Recover with a 12-word seed phrase.</div>
+            </div>
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-right">🪙</div>
+              <div class="vs-trait-text"><strong>Tokenized ownership</strong> — Earn tokens for contributing. Own a piece of the protocols you use. Value flows to participants, not platforms.</div>
+            </div>
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-right">✅</div>
+              <div class="vs-trait-text"><strong>Permissionless</strong> — Smart contracts run on-chain. Anyone can interact, deploy, or fork. Code is law — no gatekeepers.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Ethereum vs Bitcoin -->
+    <div class="concept-block animate-fade-up delay-1">
+      <div class="concept-heading">
+        <span class="concept-num">02</span>
+        <span class="concept-title">Ethereum vs Bitcoin</span>
+      </div>
+      <div class="table-wrapper">
+        <table class="concept-table">
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th class="col-a">₿ Bitcoin</th>
+              <th class="col-b">⟠ Ethereum</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Purpose</td>
+              <td>Digital gold — a store of value and peer-to-peer payment system</td>
+              <td>Programmable blockchain — a world computer for decentralized apps</td>
+            </tr>
+            <tr>
+              <td>Created</td>
+              <td>2009 by Satoshi Nakamoto (pseudonymous)</td>
+              <td>2015 by Vitalik Buterin and co-founders</td>
+            </tr>
+            <tr>
+              <td>Smart Contracts</td>
+              <td>❌ Not natively supported — script only, very limited</td>
+              <td>✅ Full Turing-complete smart contracts via Solidity/Vyper</td>
+            </tr>
+            <tr>
+              <td>Supply</td>
+              <td>Hard capped at 21 million BTC — fixed forever by the protocol</td>
+              <td>No hard cap — ~120M ETH supply, with burn mechanism (EIP-1559)</td>
+            </tr>
+            <tr>
+              <td>Consensus</td>
+              <td>Proof of Work — miners compete to solve puzzles, energy intensive</td>
+              <td>Proof of Stake — validators lock ETH as collateral, ~99.95% less energy</td>
+            </tr>
+            <tr>
+              <td>Block Time</td>
+              <td>~10 minutes per block</td>
+              <td>~12 seconds per block</td>
+            </tr>
+            <tr>
+              <td>Ecosystem</td>
+              <td>Primarily payments, Lightning Network for speed, Ordinals for NFTs</td>
+              <td>DeFi, NFTs, DAOs, L2s, gaming, identity — the broadest ecosystem in Web3</td>
+            </tr>
+            <tr>
+              <td>Analogy</td>
+              <td>Digital gold — scarce, predictable, store of value</td>
+              <td>Digital oil — powers computation, fuels the decentralized economy</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. Public Key vs Private Key -->
+    <div class="concept-block animate-fade-up delay-2">
+      <div class="concept-heading">
+        <span class="concept-num">03</span>
+        <span class="concept-title">Public Key vs Private Key</span>
+      </div>
+      <div class="key-pair-grid">
+        <div class="key-card public-key">
+          <div class="key-icon">🔓</div>
+          <div class="key-label text-blue">Public Key</div>
+          <div class="key-name">Your Address — Share Freely</div>
+          <div class="key-example">0x742d35Cc6634C0532925a3b8D4C9b5d8f2c1e3A</div>
+          <div class="key-points">
+            <div class="key-point">📬 Like your home address — give it to anyone who wants to send you crypto</div>
+            <div class="key-point">🔢 Derived mathematically from your private key using elliptic curve cryptography</div>
+            <div class="key-point">🌐 Visible on the blockchain — every transaction you receive is public</div>
+            <div class="key-point">✅ Safe to share on Twitter, in emails, or on your website</div>
+          </div>
+        </div>
+        <div class="key-card private-key">
+          <div class="key-icon">🔒</div>
+          <div class="key-label text-orange">Private Key</div>
+          <div class="key-name">Your Password — Never Share</div>
+          <div class="key-example">5HueCGU8rMjxECyDialwujkPMNSMQZiE★★★★★★★★★★★★★★★★</div>
+          <div class="key-points">
+            <div class="key-point">🗝️ Like your house key — whoever has it controls your wallet, period</div>
+            <div class="key-point">🔏 256-bit random number — essentially impossible to brute-force guess</div>
+            <div class="key-point">✍️ Used to sign transactions, proving you authorized them without revealing the key</div>
+            <div class="key-point">⚠️ Lost private key = lost funds forever. No customer support. No recovery.</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top: 1rem; padding: 1rem 1.5rem; background: rgba(255,145,0,0.07); border: 1px solid rgba(255,145,0,0.2); border-radius: var(--radius); font-size: 0.875rem; color: var(--text-secondary);">
+        <strong style="color: var(--arb-orange);">⚡ How it works together:</strong> You sign a transaction with your private key → the network verifies the signature using your public key → transaction is broadcast. The private key proves ownership without ever being revealed.
+      </div>
+    </div>
+
+    <!-- 4. Blockchain vs Traditional Databases -->
+    <div class="concept-block animate-fade-up delay-3">
+      <div class="concept-heading">
+        <span class="concept-num">04</span>
+        <span class="concept-title">Blockchain vs Traditional Databases</span>
+      </div>
+      <div class="vs-grid">
+        <div class="vs-side">
+          <div class="vs-entity">🗄️ Traditional DB</div>
+          <div class="vs-tagline">// MySQL, PostgreSQL, MongoDB</div>
+          <div class="vs-traits">
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-left">👤</div>
+              <div class="vs-trait-text"><strong>Single admin</strong> — One entity controls read/write permissions. The DBA can modify or delete any record.</div>
+            </div>
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-left">⚡</div>
+              <div class="vs-trait-text"><strong>Extremely fast</strong> — Millions of reads/writes per second. Optimized for performance with indexes, caching, and sharding.</div>
+            </div>
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-left">✏️</div>
+              <div class="vs-trait-text"><strong>Mutable records</strong> — UPDATE and DELETE are core operations. History can be rewritten or wiped.</div>
+            </div>
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-left">🏛️</div>
+              <div class="vs-trait-text"><strong>Trust the operator</strong> — You trust the company running the database to be honest, secure, and available.</div>
+            </div>
+          </div>
+        </div>
+        <div class="vs-divider">
+          <div class="vs-badge">VS</div>
+        </div>
+        <div class="vs-side right">
+          <div class="vs-entity">⛓️ Blockchain</div>
+          <div class="vs-tagline">// Ethereum, Bitcoin, Arbitrum</div>
+          <div class="vs-traits">
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-right">🌍</div>
+              <div class="vs-trait-text"><strong>Distributed consensus</strong> — Thousands of nodes must agree. No single entity can alter the data without controlling 51%+ of the network.</div>
+            </div>
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-right">🐢</div>
+              <div class="vs-trait-text"><strong>Slower but trustless</strong> — Speed is sacrificed for decentralization. Every node verifies every transaction independently.</div>
+            </div>
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-right">🔒</div>
+              <div class="vs-trait-text"><strong>Immutable history</strong> — Once confirmed, data cannot be changed. Every block links to the previous via cryptographic hash.</div>
+            </div>
+            <div class="vs-trait">
+              <div class="vs-trait-icon icon-right">🤖</div>
+              <div class="vs-trait-text"><strong>Trust the math</strong> — Cryptography and consensus rules guarantee integrity. No need to trust any human operator.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /concepts-wrapper -->
+
+  <footer>
+    <div class="footer-left">
+      Made by <strong>Vedant Raval</strong> &nbsp;·&nbsp; Arbitrum Builder Pods &nbsp;·&nbsp; PDEU Batch 2023
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/Veds20" target="_blank">GitHub ↗</a>
+      <a href="index.html">Home</a>
+      <a href="prices.html">Prices</a>
+      <a href="simulator.html">Simulator</a>
+    </div>
+  </footer>
+
+</body>
+</html>
