@@ -107,7 +107,7 @@ npx serve .
 **Vedant Raval**  
 B.Tech ICT — Pandit Deendayal Energy University, Gandhinagar  
 GitHub: [@Veds20](https://github.com/Veds20)  
-Batch: Arbitrum Builder Pods 2023
+Batch: Arbitrum Builder Pods 2026
 
 ---
 
